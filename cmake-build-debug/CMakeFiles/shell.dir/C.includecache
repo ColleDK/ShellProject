@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/root/CLionProjects/shell/main.c
+stdio.h
+-
+unistd.h
+-
+stdlib.h
+-
+dirent.h
+-
+asm/errno.h
+-
+errno.h
+-
+memory.h
+-
+sys/stat.h
+-
+
