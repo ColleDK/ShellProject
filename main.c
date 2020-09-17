@@ -220,11 +220,6 @@ int main(int argc, char** argv) {
 
         }
 
-        else if (isPipe){
-
-
-        }
-
 //        else if (strcmp("cat",firstInput) == 0) {
 //            FILE *f = fopen(secondInput, "r");
 //            if (f != NULL) {
@@ -246,7 +241,9 @@ int main(int argc, char** argv) {
         }
 
 
-
+        if (isPipe){
+            printf("is pipe\n");
+        }
 
 
         /**
