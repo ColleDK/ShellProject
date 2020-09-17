@@ -11,6 +11,7 @@
  * Global variables
  */
 int TRUE = 1;
+int isPipe = 0;
 
 /**
  *
@@ -122,6 +123,7 @@ int main(int argc, char** argv) {
 
 
     while(TRUE){
+        isPipe = 0;
         arrayCleaner(input, sizeof(input));
         /**
          * Show current path + $ in the console
@@ -135,6 +137,15 @@ int main(int argc, char** argv) {
          */
         scanf("%[^\n]%*c",input);
 
+
+        /**
+         * Check for pipe
+         */
+        for (int j = 0; j < strlen(input); ++j) {
+            if (input[j] ==  '|'){
+                isPipe = 1;
+            }
+        }
 
 
         /**
@@ -198,9 +209,40 @@ int main(int argc, char** argv) {
         else if (strcmp("clear",firstInput) == 0){
             system("clear\n");
         }
+        /**
+         * Echoes everything after echo and space
+         */
+        else if (strcmp("echo",firstInput) == 0) {
+            for (int i = 5; i < strlen(input); ++i) {
+                printf("%c",input[i]);
+            }
+            printf("\n");
+
+        }
+
+        else if (isPipe){
+
+
+        }
+
+//        else if (strcmp("cat",firstInput) == 0) {
+//            FILE *f = fopen(secondInput, "r");
+//            if (f != NULL) {
+//                char fileArr[100] = "";
+//                arrayCleaner(fileArr, strlen(fileArr));
+//                fgets(fileArr, 100, f);
+//                printf("%s\n",fileArr);
+//            } else {
+//                printf("No file found\n");
+//            }
+//
+//
+//
+//        }
+
+
         else{
             printf("Command not found\n");
-            fflush(stdin);
         }
 
 
@@ -212,6 +254,7 @@ int main(int argc, char** argv) {
          */
         arrayCleaner(firstInput,strlen(firstInput));
         arrayCleaner(secondInput,strlen(secondInput));
+        fflush(stdin);
     }
     return 0;
 }
