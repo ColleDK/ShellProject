@@ -12,9 +12,11 @@ int TRUE = 1;
 
 
 void previousCD(char* fullPath){
+    /** This will first clear the "/" in front and then clear until the next "/"
+     *
+     */
     int place = strlen(fullPath)-2;
     fullPath[place+1] = '\0';
-    fullPath[place+2] = '\0';
     while(fullPath[place] != '/'){
         fullPath[place--] = '\0';
     }
