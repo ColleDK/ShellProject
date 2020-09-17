@@ -76,7 +76,7 @@ char* inputSplitter(char* arr, int inputNumber){
     endpoint = placeCounter;
 
     char *array = malloc((endpoint-startpoint) * sizeof(char));
-    arrayCleaner(array, endpoint-startpoint);
+    arrayCleaner(array, strlen(array));
     int loopCounter=0;
     for (int i = startpoint; i < endpoint; ++i) {
         array[loopCounter++] = arr[i];
@@ -175,6 +175,20 @@ int main(int argc, char** argv) {
              *  Checks current path https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
              *  Makes a temporary path and checks if it exists, if yes copy the temp path to fullpath
              */
+            else if (secondInput[0] == '/'){
+                char *tempPath = malloc((strlen(secondInput) + strlen(slash)) * sizeof(char));
+                strcat(tempPath, secondInput);
+                strcat(tempPath, slash);
+                if (isDirectoryExists(tempPath) == 0) {
+                    printf("%s\n", strerror(errno));
+                } else {
+                    free(fullPath);
+                    fullPath = malloc(strlen(tempPath) * sizeof(char));
+                    arrayCleaner(fullPath,strlen(fullPath));
+                    strcpy(fullPath,tempPath);
+                    free(tempPath);
+                }
+            }
             else if (strlen(secondInput) != 0){
                 char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
                 strcpy(tempPath, fullPath);
@@ -187,6 +201,10 @@ int main(int argc, char** argv) {
                     strcpy(fullPath,tempPath);
                     free(tempPath);
                 }
+            } else {
+                arrayCleaner(fullPath, strlen(fullPath));
+                strcpy(fullPath,h);
+                strcat(fullPath,slash);
             }
         }
 
@@ -198,11 +216,16 @@ int main(int argc, char** argv) {
             DIR* pd = opendir(fullPath);
             struct dirent *cur;
             while (cur = readdir(pd)) {
-                if (cur->d_name[0] != '.') {
-                    printf("%s\n",cur->d_name);
+                if (strcmp("-a", secondInput) == 0) {
+                    printf("%s\n", cur->d_name);
+                } else {
+                    if (cur->d_name[0] != '.') {
+                        printf("%s\n", cur->d_name);
+                    }
                 }
             }
             closedir(pd);
+            free(cur);
         }
 
         /**
@@ -258,8 +281,6 @@ int main(int argc, char** argv) {
         /**
          * Clean the arrays for next loop and flush input from keyboard
          */
-        arrayCleaner(firstInput,strlen(firstInput));
-        arrayCleaner(secondInput,strlen(secondInput));
         fflush(stdin);
     }
     return 0;
