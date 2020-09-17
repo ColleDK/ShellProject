@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <dirent.h>
-#include <asm/errno.h>
+//#include <asm/errno.h>
 #include <errno.h>
 #include <memory.h>
 #include <sys/stat.h>
@@ -24,6 +24,16 @@ void cdFunction(char* name){
     }
     else{
         printf("some error occured\n");
+    }
+}
+
+
+void previousCD(char* fullPath){
+    int place = strlen(fullPath)-2;
+    fullPath[place+1] = '\0';
+    fullPath[place+2] = '\0';
+    while(fullPath[place] != '/'){
+        fullPath[place--] = '\0';
     }
 }
 
@@ -92,16 +102,15 @@ int main(int argc, char** argv) {
     // GETS NAME OF USER (  sry :(  ) https://www.unix.com/programming/21041-getting-username-c-program-unix.html
     char *p=getenv("USER");
     char slash[] = "/";
-    char desktop[] = "Desktop";
-    char *normalPath = malloc((strlen(p) + 2 * strlen(slash) + strlen(desktop)) * sizeof(char ));
-    strcpy(normalPath,slash);
-    strcat(normalPath,p);
-    strcat(normalPath,slash);
-    strcat(normalPath,desktop);
-    printf("%s\n", normalPath);
+    //char desktop[] = "Desktop";
+    char* fullPath = malloc((strlen(p) + 2 * strlen(slash)) * sizeof(char ));
+    strcpy(fullPath,slash);
+    strcat(fullPath,p);
+    strcat(fullPath,slash);
+    //strcat(normalPath,desktop);
+    printf("%s\n", fullPath);
 
-    printf("%x\n",isDirectoryExists(normalPath));
-    free(normalPath);
+    printf("%x\n",isDirectoryExists(fullPath));
 
     arrayCleaner(directory, sizeof(directory));
 
@@ -117,7 +126,7 @@ int main(int argc, char** argv) {
     while(TRUE){
         arrayCleaner(input, sizeof(input));
         // LOOK LIKE BASH
-        printf("$\t");
+        printf("%s $\t",fullPath);
         // READ INPUT FROM TERMINAL
         //use this to read whole line instead of scanf("%s",input);  https://www.quora.com/How-do-I-read-and-display-a-full-sentence-in-C
         scanf("%[^\n]%*c",input);
@@ -137,10 +146,13 @@ int main(int argc, char** argv) {
         // IF cd USE FUNCTION
         if (result == 0){
             arrayCleaner(input, sizeof(input));
+            if(strcmp("..", secondInput) == 0){
+                previousCD(fullPath);
+            }
             // CHECKS CURRENT PATH https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
-            if (getcwd(input, sizeof(input)) != NULL ){
+            else if (getcwd(input, sizeof(input)) != NULL ){
                 printf("%s\n", input);
-                char* fullPath = malloc((strlen(input) + strlen(secondInput) + strlen(slash)) * sizeof(char));
+                fullPath = malloc((strlen(input) + strlen(secondInput) + strlen(slash)) * sizeof(char));
                 strcpy(fullPath, input);
                 strcat(fullPath, slash);
                 strcat(fullPath,secondInput);
