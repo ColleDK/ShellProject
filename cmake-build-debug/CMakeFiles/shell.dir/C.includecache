@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/Users/Colle/CLionProjects/ShellProject/main.c
+/root/CLionProjects/shell/main.c
 stdio.h
 -
 unistd.h

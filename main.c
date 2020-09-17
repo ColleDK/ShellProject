@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <dirent.h>
-//#include <asm/errno.>
 #include <errno.h>
 #include <memory.h>
 #include <sys/stat.h>
@@ -32,7 +31,7 @@ void previousCD(char* fullPath){
 // https://codeforwin.org/2018/03/c-program-check-file-or-directory-exists-not.html
 /**
  * Function to check whether a directory exists or not.
- * It returns 1 if given path is directory and  exists
+ * It returns 1 if given path is directory exists
  * otherwise returns 0.
  */
 int isDirectoryExists(const char *path)
@@ -125,6 +124,8 @@ int main(int argc, char** argv) {
     while(TRUE){
         isPipe = 0;
         arrayCleaner(input, sizeof(input));
+        arrayCleaner(firstInput,strlen(firstInput));
+        arrayCleaner(secondInput,strlen(secondInput));
         /**
          * Show current path + $ in the console
          */
@@ -201,6 +202,7 @@ int main(int argc, char** argv) {
                     printf("%s\n",cur->d_name);
                 }
             }
+            closedir(pd);
         }
 
         /**
@@ -220,20 +222,27 @@ int main(int argc, char** argv) {
 
         }
 
-//        else if (strcmp("cat",firstInput) == 0) {
-//            FILE *f = fopen(secondInput, "r");
-//            if (f != NULL) {
-//                char fileArr[100] = "";
-//                arrayCleaner(fileArr, strlen(fileArr));
-//                fgets(fileArr, 100, f);
-//                printf("%s\n",fileArr);
-//            } else {
-//                printf("No file found\n");
-//            }
-//
-//
-//
-//        }
+        /**
+         * cat will output the content of a file given that the file exists
+         * max number of characters on a line is set to 256
+         */
+        else if (strcmp("cat",firstInput) == 0) {
+            char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
+            strcpy(tempPath, fullPath);
+            strcat(tempPath, secondInput);
+            FILE *f = fopen(tempPath, "r");
+            if (f != NULL) {
+                char fileArr[256] = "";
+                arrayCleaner(fileArr, strlen(fileArr));
+                while (fgets(fileArr, 256, f) != NULL) {
+                    printf("%s", fileArr);
+                }
+            }
+            else {
+                printf("No file found\n");
+            }
+            free(tempPath);
+        }
 
 
         else{
