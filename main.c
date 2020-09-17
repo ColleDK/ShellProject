@@ -63,7 +63,7 @@ void arrayCleaner(char* arr, int length){
 char* inputSplitter(char* arr, int inputNumber){
     int spaceCounter=0, placeCounter=0, startpoint=0, endpoint=0;
     while (inputNumber-1 != spaceCounter){
-        while (arr[placeCounter] != ' ' && arr[placeCounter] != '\0'){
+        while (arr[placeCounter] != ' ' && arr[placeCounter] != '\0' && arr[placeCounter] != '\n'){
             placeCounter++;
         }
         placeCounter++;
@@ -76,7 +76,7 @@ char* inputSplitter(char* arr, int inputNumber){
     endpoint = placeCounter;
 
     char *array = malloc((endpoint-startpoint) * sizeof(char));
-    arrayCleaner(array, strlen(array));
+    arrayCleaner(array, sizeof(array)/sizeof(char));
     int loopCounter=0;
     for (int i = startpoint; i < endpoint; ++i) {
         array[loopCounter++] = arr[i];
@@ -92,9 +92,9 @@ int main(int argc, char** argv) {
     /**
      * Declare some array pointers to use later with malloc, and a max sized input array
      */
-    char* firstInput="";
-    char* secondInput="";
-    char input[256]="";
+    char *firstInput = "";
+    char *secondInput = "";
+    char input[256] = "";
     /**
      * Gets name of home path (maybe i should do current directory instead?) https://www.tutorialspoint.com/c_standard_library/c_function_getenv.htm
      */
@@ -106,44 +106,42 @@ int main(int argc, char** argv) {
     /**
      * Allocate memory on heap for the path that is HOME+/
      */
-    char* fullPath = malloc((strlen(h) + strlen(slash)) * sizeof(char ));
-    strcpy(fullPath,h);
-    strcat(fullPath,slash);
+    char *fullPath = malloc((strlen(h) + strlen(slash)) * sizeof(char));
+    strcpy(fullPath, h);
+    strcat(fullPath, slash);
 
 
 
     /**
      * Check if there is input before starting program and do them
      */
-    if (argc != 0){
+    if (argc != 0) {
         // DO THE REQUEST
 
     }
 
 
-    while(TRUE){
+    while (TRUE) {
         isPipe = 0;
         arrayCleaner(input, sizeof(input));
-        arrayCleaner(firstInput,strlen(firstInput));
-        arrayCleaner(secondInput,strlen(secondInput));
         /**
          * Show current path + $ in the console
          */
-        printf("%s $\t",fullPath);
+        printf("%s $\t", fullPath);
 
 
         /**
          * Read input of whole line.
          * Instead of scanf("%s",input);  https://www.quora.com/How-do-I-read-and-display-a-full-sentence-in-C
          */
-        scanf("%[^\n]%*c",input);
+        scanf("%[^\n]%*c", input);
 
 
         /**
          * Check for pipe
          */
         for (int j = 0; j < strlen(input); ++j) {
-            if (input[j] ==  '|'){
+            if (input[j] == '|') {
                 isPipe = 1;
             }
         }
@@ -160,23 +158,23 @@ int main(int argc, char** argv) {
          * Compare first input with cd
          * If cd use function
          */
-        if (strcmp("cd", firstInput) == 0){
+        if (strcmp("cd", firstInput) == 0) {
             /**
              * If second input is .. we need to go back 1 directory except if the directory is "/"
              */
-            if(strcmp("..", secondInput) == 0){
-                if(strlen(fullPath) == 1){
+            if (strcmp("..", secondInput) == 0) {
+                if (strlen(fullPath) == 1) {
                     printf("Path is at lowest point\n");
-                }
-                else previousCD(fullPath);
+                } else previousCD(fullPath);
             }
 
-            /**
-             *  Checks current path https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
-             *  Makes a temporary path and checks if it exists, if yes copy the temp path to fullpath
-             */
-            else if (secondInput[0] == '/'){
+                /**
+                 *  Checks current path https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
+                 *  Makes a temporary path and checks if it exists, if yes copy the temp path to fullpath
+                 */
+            else if (secondInput[0] == '/') {
                 char *tempPath = malloc((strlen(secondInput) + strlen(slash)) * sizeof(char));
+                arrayCleaner(tempPath,sizeof(tempPath)/sizeof(char));
                 strcat(tempPath, secondInput);
                 strcat(tempPath, slash);
                 if (isDirectoryExists(tempPath) == 0) {
@@ -184,12 +182,11 @@ int main(int argc, char** argv) {
                 } else {
                     free(fullPath);
                     fullPath = malloc(strlen(tempPath) * sizeof(char));
-                    arrayCleaner(fullPath,strlen(fullPath));
-                    strcpy(fullPath,tempPath);
+                    arrayCleaner(fullPath, sizeof(fullPath)/sizeof(char));
+                    strcpy(fullPath, tempPath);
                     free(tempPath);
                 }
-            }
-            else if (strlen(secondInput) != 0){
+            } else if (strlen(secondInput) != 0) {
                 char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
                 strcpy(tempPath, fullPath);
                 strcat(tempPath, secondInput);
@@ -197,23 +194,23 @@ int main(int argc, char** argv) {
                 if (isDirectoryExists(tempPath) == 0) {
                     printf("%s\n", strerror(errno));
                 } else {
-                    arrayCleaner(fullPath,strlen(fullPath));
-                    strcpy(fullPath,tempPath);
+                    arrayCleaner(fullPath, sizeof(fullPath)/sizeof(char));
+                    strcpy(fullPath, tempPath);
                     free(tempPath);
                 }
             } else {
-                arrayCleaner(fullPath, strlen(fullPath));
-                strcpy(fullPath,h);
-                strcat(fullPath,slash);
+                arrayCleaner(fullPath, sizeof(fullPath)/sizeof(char));
+                strcpy(fullPath, h);
+                strcat(fullPath, slash);
             }
         }
 
-        /**
-         * https://stackoverflow.com/questions/845556/how-to-ignore-hidden-files-with-opendir-and-readdir-in-c-library
-         * Searches the directory for all files except for ones that start with . or .. (hidden files)
-         */
-        else if (strcmp("ls",firstInput) == 0){
-            DIR* pd = opendir(fullPath);
+            /**
+             * https://stackoverflow.com/questions/845556/how-to-ignore-hidden-files-with-opendir-and-readdir-in-c-library
+             * Searches the directory for all files except for ones that start with . or .. (hidden files)
+             */
+        else if (strcmp("ls", firstInput) == 0) {
+            DIR *pd = opendir(fullPath);
             struct dirent *cur;
             while (cur = readdir(pd)) {
                 if (strcmp("-a", secondInput) == 0) {
@@ -228,52 +225,48 @@ int main(int argc, char** argv) {
             free(cur);
         }
 
-        /**
-         * will clear console but only on linux system
-         */
-        else if (strcmp("clear",firstInput) == 0){
+            /**
+             * will clear console but only on linux system
+             */
+        else if (strcmp("clear", firstInput) == 0) {
             system("clear\n");
         }
-        /**
-         * Echoes everything after echo and space
-         */
-        else if (strcmp("echo",firstInput) == 0) {
+            /**
+             * Echoes everything after echo and space
+             */
+        else if (strcmp("echo", firstInput) == 0) {
             for (int i = 5; i < strlen(input); ++i) {
-                printf("%c",input[i]);
+                printf("%c", input[i]);
             }
             printf("\n");
 
         }
 
-        /**
-         * cat will output the content of a file given that the file exists
-         * max number of characters on a line is set to 256
-         */
-        else if (strcmp("cat",firstInput) == 0) {
+            /**
+             * cat will output the content of a file given that the file exists
+             * max number of characters on a line is set to 256
+             */
+        else if (strcmp("cat", firstInput) == 0) {
             char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
             strcpy(tempPath, fullPath);
             strcat(tempPath, secondInput);
             FILE *f = fopen(tempPath, "r");
             if (f != NULL) {
                 char fileArr[256] = "";
-                arrayCleaner(fileArr, strlen(fileArr));
+                arrayCleaner(fileArr, sizeof(fileArr));
                 while (fgets(fileArr, 256, f) != NULL) {
                     printf("%s", fileArr);
                 }
-            }
-            else {
+            } else {
                 printf("No file found\n");
             }
             free(tempPath);
-        }
-
-
-        else{
+        } else {
             printf("Command not found\n");
         }
 
 
-        if (isPipe){
+        if (isPipe) {
             printf("is pipe\n");
         }
 
@@ -281,6 +274,8 @@ int main(int argc, char** argv) {
         /**
          * Clean the arrays for next loop and flush input from keyboard
          */
+        free(firstInput);
+        free(secondInput);
         fflush(stdin);
     }
     return 0;
