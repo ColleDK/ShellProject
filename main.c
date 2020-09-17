@@ -9,23 +9,6 @@
 
 // GLOBAL VARIABLES
 int TRUE = 1;
-char directory[256];
-
-
-// CD FUNCTION https://stackoverflow.com/questions/12510874/how-can-i-check-if-a-directory-exists
-void cdFunction(char* name){
-    DIR* dir = opendir(name);
-    if (dir){
-        printf("cool");
-        closedir(dir);
-    }
-    else if (ENOENT == errno){
-        printf("%x\n", ENOENT);
-    }
-    else{
-        printf("some error occured\n");
-    }
-}
 
 
 void previousCD(char* fullPath){
@@ -99,24 +82,19 @@ char* inputSplitter(char* arr, int inputNumber){
 
 
 int main(int argc, char** argv) {
-    // GETS NAME OF USER (  sry :(  ) https://www.unix.com/programming/21041-getting-username-c-program-unix.html
-    char *p=getenv("USER");
+    char* firstInput="";
+    char* secondInput="";
+    // GETS NAME OF HOME PATH (  sry :(  ) https://www.tutorialspoint.com/c_standard_library/c_function_getenv.htm
+    char *h = getenv("HOME");
     char slash[] = "/";
     //char desktop[] = "Desktop";
-    char* fullPath = malloc((strlen(p) + 2 * strlen(slash)) * sizeof(char ));
-    strcpy(fullPath,slash);
-    strcat(fullPath,p);
+    char* fullPath = malloc((strlen(h) + strlen(slash)) * sizeof(char ));
+    strcpy(fullPath,h);
     strcat(fullPath,slash);
-    //strcat(normalPath,desktop);
-    printf("%s\n", fullPath);
-
-    printf("%x\n",isDirectoryExists(fullPath));
-
-    arrayCleaner(directory, sizeof(directory));
 
 
     // DETERMINE MAX INPUT SIZE TO BE SAVE OF OVERFLOW AND TIME EFFICIENCY
-    char input[256];
+    char input[256]="";
     if (argc != 0){
         // DO THE REQUEST
 
@@ -133,13 +111,10 @@ int main(int argc, char** argv) {
 
 
 
-        char* firstInput = inputSplitter(input, 1);
-        printf("%s \n", firstInput);
+        // SPLIT INPUTS INTO
+        firstInput = inputSplitter(input, 1);
+        secondInput = inputSplitter(input, 2);
 
-
-
-        char* secondInput = inputSplitter(input, 2);
-        printf("%s \n", secondInput);
 
         // COMPARE FIRST INPUT WITH cd
         int result = strcmp("cd", firstInput);
@@ -147,20 +122,25 @@ int main(int argc, char** argv) {
         if (result == 0){
             arrayCleaner(input, sizeof(input));
             if(strcmp("..", secondInput) == 0){
-                previousCD(fullPath);
+                if(strlen(fullPath) == 1){
+                    printf("Path is at lowest point\n");
+                }
+                else previousCD(fullPath);
             }
+
             // CHECKS CURRENT PATH https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
-            else if (getcwd(input, sizeof(input)) != NULL ){
-                printf("%s\n", input);
-                fullPath = malloc((strlen(input) + strlen(secondInput) + strlen(slash)) * sizeof(char));
-                strcpy(fullPath, input);
-                strcat(fullPath, slash);
-                strcat(fullPath,secondInput);
-                printf("%s",fullPath);
-                printf("%x",isDirectoryExists(fullPath));
-            }
-            else{
-                printf("%s\n", strerror(errno));
+            else {
+                //printf("%s\n", input);
+                char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
+                strcpy(tempPath, fullPath);
+                strcat(tempPath, secondInput);
+                strcat(tempPath, slash);
+                if (isDirectoryExists(tempPath) == 0) {
+                    printf("%s\n", strerror(errno));
+                } else {
+                    arrayCleaner(fullPath,strlen(fullPath));
+                    strcpy(fullPath,tempPath);
+                }
             }
         }
 
@@ -168,11 +148,8 @@ int main(int argc, char** argv) {
 
 
 
-
-
-        free(firstInput);
-        free(secondInput);
-        //printf("%s\n",input);
+        arrayCleaner(firstInput,strlen(firstInput));
+        arrayCleaner(secondInput,strlen(secondInput));
     }
     return 0;
 }
