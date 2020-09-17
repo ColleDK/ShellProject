@@ -37,23 +37,14 @@ void previousCD(char* fullPath){
 int isDirectoryExists(const char *path)
 {
     struct stat stats;
-
     stat(path, &stats);
-
-    // Check for file existence
     if (S_ISDIR(stats.st_mode))
         return 1;
-
     return 0;
 }
 
 
-
-
-
-
 /**
- *
  * @param arr is a pointer to an array that needs to be erased of content
  * @param length is the length of content in the array (not length of array)
  */
@@ -64,7 +55,6 @@ void arrayCleaner(char* arr, int length){
 }
 
 /**
- *
  * @param arr is a pointer to an array that needs to be split
  * @param inputNumber is the numbered input you want
  * @return returns a pointer to a new array
@@ -85,7 +75,6 @@ char* inputSplitter(char* arr, int inputNumber){
     }
     endpoint = placeCounter;
 
-    // allocate space for array (also to be used outside of function)
     char *array = malloc((endpoint-startpoint) * sizeof(char));
     arrayCleaner(array, endpoint-startpoint);
     int loopCounter=0;
@@ -160,7 +149,6 @@ int main(int argc, char** argv) {
          * If cd use function
          */
         if (strcmp("cd", firstInput) == 0){
-            arrayCleaner(input, sizeof(input));
             /**
              * If second input is .. we need to go back 1 directory except if the directory is "/"
              */
@@ -175,7 +163,7 @@ int main(int argc, char** argv) {
              *  Checks current path https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
              *  Makes a temporary path and checks if it exists, if yes copy the temp path to fullpath
              */
-            else {
+            else if (strlen(secondInput) != 0){
                 char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
                 strcpy(tempPath, fullPath);
                 strcat(tempPath, secondInput);
@@ -194,12 +182,12 @@ int main(int argc, char** argv) {
          * https://stackoverflow.com/questions/845556/how-to-ignore-hidden-files-with-opendir-and-readdir-in-c-library
          * Searches the directory for all files except for ones that start with . or .. (hidden files)
          */
-        if (strcmp("ls",firstInput) == 0){
+        else if (strcmp("ls",firstInput) == 0){
             DIR* pd = opendir(fullPath);
             struct dirent *cur;
             while (cur = readdir(pd)) {
                 if (cur->d_name[0] != '.') {
-                    puts(cur->d_name);
+                    printf("%s\n",cur->d_name);
                 }
             }
         }
@@ -207,13 +195,20 @@ int main(int argc, char** argv) {
         /**
          * will clear console but only on linux system
          */
-        if (strcmp("clear",firstInput) == 0){
+        else if (strcmp("clear",firstInput) == 0){
             system("clear\n");
+        }
+        else{
+            printf("Command not found\n");
+            fflush(stdin);
         }
 
 
+
+
+
         /**
-         * Clean the arrays for next loop
+         * Clean the arrays for next loop and flush input from keyboard
          */
         arrayCleaner(firstInput,strlen(firstInput));
         arrayCleaner(secondInput,strlen(secondInput));
