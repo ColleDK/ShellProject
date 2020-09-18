@@ -94,6 +94,7 @@ int main(int argc, char** argv) {
      */
     char *firstInput = "";
     char *secondInput = "";
+    char *thirdInput = "";
     char input[256] = "";
     /**
      * Gets name of home path (maybe i should do current directory instead?) https://www.tutorialspoint.com/c_standard_library/c_function_getenv.htm
@@ -152,7 +153,9 @@ int main(int argc, char** argv) {
          */
         firstInput = inputSplitter(input, 1);
         secondInput = inputSplitter(input, 2);
-
+        if (strlen(firstInput)+strlen(secondInput) != strlen(input)-1) {
+            thirdInput = inputSplitter(input, 3);
+        }
 
         /**
          * Compare first input with cd
@@ -226,7 +229,7 @@ int main(int argc, char** argv) {
         }
 
             /**
-             * will clear console but only on linux system
+             * will clear console but only through command line
              */
         else if (strcmp("clear", firstInput) == 0) {
             system("clear\n");
@@ -241,6 +244,33 @@ int main(int argc, char** argv) {
             printf("\n");
 
         }
+
+        /**
+         * https://stackoverflow.com/questions/13450809/how-to-search-a-string-in-a-char-array-in-c
+         * use strstr() to search for word in and output if found
+         */
+
+        else if (strcmp("grep", firstInput) == 0) {
+            char *tempPath = malloc((strlen(fullPath) + strlen(thirdInput) + strlen(slash)) * sizeof(char));
+            strcpy(tempPath, fullPath);
+            strcat(tempPath, thirdInput);
+            FILE *f = fopen(tempPath, "r");
+            if (f != NULL) {
+                char fileArr[256] = "";
+                arrayCleaner(fileArr, sizeof(fileArr));
+                char *string;
+                while (fgets(fileArr, 256, f) != NULL) {
+                    string = strstr(fileArr, secondInput);
+                    if (string != NULL) {
+                        printf("%s", fileArr);
+                    }
+                }
+            } else {
+                printf("No file found\n");
+            }
+            free(tempPath);
+        }
+
 
             /**
              * cat will output the content of a file given that the file exists
