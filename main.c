@@ -95,6 +95,8 @@ int main(int argc, char** argv) {
     char *firstInput = "";
     char *secondInput = "";
     char *thirdInput = "";
+    char *fourthInput = "";
+    char *fifthInput = "";
     char input[256] = "";
     /**
      * Gets name of home path (maybe i should do current directory instead?) https://www.tutorialspoint.com/c_standard_library/c_function_getenv.htm
@@ -153,9 +155,7 @@ int main(int argc, char** argv) {
          */
         firstInput = inputSplitter(input, 1);
         secondInput = inputSplitter(input, 2);
-        if (strlen(firstInput)+strlen(secondInput) != strlen(input)-1) {
-            thirdInput = inputSplitter(input, 3);
-        }
+        thirdInput = inputSplitter(input, 3);
 
         /**
          * Compare first input with cd
@@ -172,7 +172,6 @@ int main(int argc, char** argv) {
             }
 
                 /**
-                 *  Checks current path https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
                  *  Makes a temporary path and checks if it exists, if yes copy the temp path to fullpath
                  */
             else if (secondInput[0] == '/') {
@@ -244,6 +243,52 @@ int main(int argc, char** argv) {
             printf("\n");
 
         }
+
+        else if (strcmp("pwd", firstInput) == 0){
+            printf("%s\n",fullPath);
+        }
+
+
+        /**
+         * makes directory
+         */
+        else if (strcmp("mkdir", firstInput) == 0){
+            char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
+            arrayCleaner(tempPath,sizeof(tempPath)/sizeof(char));
+            strcpy(tempPath,fullPath);
+            strcat(tempPath, secondInput);
+            strcat(tempPath, slash);
+            if (isDirectoryExists(tempPath) == 0) {
+                mkdir(tempPath,777);
+                free(tempPath);
+            } else {
+                printf("Directory already exists\n");
+                free(tempPath);
+            }
+        }
+
+
+        /**
+         * removes directory
+         */
+        else if (strcmp("rmdir", firstInput) == 0) {
+            char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
+            arrayCleaner(tempPath, sizeof(tempPath) / sizeof(char));
+            strcpy(tempPath,fullPath);
+            strcat(tempPath, secondInput);
+            strcat(tempPath, slash);
+            if (isDirectoryExists(tempPath) == 0) {
+                free(tempPath);
+                printf("Directory doesn't exist\n");
+            } else {
+                rmdir(tempPath);
+                free(tempPath);
+            }
+        }
+
+
+
+
 
         /**
          * https://stackoverflow.com/questions/13450809/how-to-search-a-string-in-a-char-array-in-c
