@@ -156,6 +156,8 @@ int main(int argc, char** argv) {
         firstInput = inputSplitter(input, 1);
         secondInput = inputSplitter(input, 2);
         thirdInput = inputSplitter(input, 3);
+        fourthInput = inputSplitter(input,4);
+        fifthInput = inputSplitter(input,5);
 
         /**
          * Compare first input with cd
@@ -229,6 +231,7 @@ int main(int argc, char** argv) {
 
             /**
              * will clear console but only through command line
+             * https://stackoverflow.com/questions/2347770/how-do-you-clear-the-console-screen-in-c
              */
         else if (strcmp("clear", firstInput) == 0) {
             system("clear\n");
@@ -341,16 +344,15 @@ int main(int argc, char** argv) {
         }
 
 
-        if (isPipe) {
-            printf("is pipe\n");
-        }
-
 
         /**
          * Clean the arrays for next loop and flush input from keyboard
          */
         free(firstInput);
         free(secondInput);
+        free(thirdInput);
+        free(fourthInput);
+        free(fifthInput);
         fflush(stdin);
     }
     return 0;
