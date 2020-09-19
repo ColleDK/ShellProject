@@ -229,6 +229,7 @@ void catCommand(char* fullPath, char* slash, char* secondInput, char* fourthInpu
             printf("No file found\n");
         }
         free(tempPath);
+        close(f);
     }
     else {
         if (strcmp("grep", fourthInput) == 0) {
