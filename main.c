@@ -203,6 +203,7 @@ void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInpu
     } else {
         printf("No file found\n");
     }
+    close(f);
     free(tempPath);
 }
 
