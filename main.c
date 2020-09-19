@@ -211,21 +211,28 @@ void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInpu
  * cat will output the content of a file given that the file exists
  * max number of characters on a line is set to 256
  */
-void catCommand(char* fullPath, char* slash, char* secondInput){
-    char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
-    strcpy(tempPath, fullPath);
-    strcat(tempPath, secondInput);
-    FILE *f = fopen(tempPath, "r");
-    if (f != NULL) {
-        char fileArr[256] = "";
-        arrayCleaner(fileArr, sizeof(fileArr));
-        while (fgets(fileArr, 256, f) != NULL) {
-            printf("%s", fileArr);
+void catCommand(char* fullPath, char* slash, char* secondInput, char* fourthInput, char* fifthInput){
+    if (isPipe == 0) {
+        char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
+        strcpy(tempPath, fullPath);
+        strcat(tempPath, secondInput);
+        FILE *f = fopen(tempPath, "r");
+        if (f != NULL) {
+            char fileArr[256] = "";
+            arrayCleaner(fileArr, sizeof(fileArr));
+            while (fgets(fileArr, 256, f) != NULL) {
+                printf("%s", fileArr);
+            }
+        } else {
+            printf("No file found\n");
         }
-    } else {
-        printf("No file found\n");
+        free(tempPath);
     }
-    free(tempPath);
+    else {
+        if (strcmp("grep", fourthInput) == 0) {
+            grepCommand(fullPath, slash, fifthInput, secondInput);
+        }
+    }
 }
 
 
@@ -350,7 +357,7 @@ int main(int argc, char** argv) {
         }
 
         else if (strcmp("cat", firstInput) == 0) {
-            catCommand(fullPath,slash,secondInput);
+            catCommand(fullPath,slash,secondInput,fourthInput,fifthInput);
         }
 
         else {
