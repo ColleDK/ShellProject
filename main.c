@@ -210,6 +210,7 @@ void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInpu
 /**
  * cat will output the content of a file given that the file exists
  * max number of characters on a line is set to 256
+ * Pipeline is placed here also for grepping word in cat
  */
 void catCommand(char* fullPath, char* slash, char* secondInput, char* fourthInput, char* fifthInput){
     if (isPipe == 0) {
