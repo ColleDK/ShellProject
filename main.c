@@ -85,6 +85,157 @@ char* inputSplitter(char* arr, int inputNumber){
 }
 
 
+void cdCommand(char* fullPath, char* slash, char* h , char* secondInput) {
+    /**
+    * If second input is .. we need to go back 1 directory except if the directory is "/"
+    */
+    if (strcmp("..", secondInput) == 0) {
+        if (strlen(fullPath) == 1) {
+            printf("Path is at lowest point\n");
+        } else previousCD(fullPath);
+    }
+
+        /**
+         *  Makes a temporary path and checks if it exists, if yes copy the temp path to fullpath
+         */
+    else if (secondInput[0] == '/') {
+        char *tempPath = malloc((strlen(secondInput) + strlen(slash)) * sizeof(char));
+        arrayCleaner(tempPath, sizeof(tempPath) / sizeof(char));
+        strcat(tempPath, secondInput);
+        strcat(tempPath, slash);
+        if (isDirectoryExists(tempPath) == 0) {
+            printf("%s\n", strerror(errno));
+        } else {
+            free(fullPath);
+            fullPath = malloc(strlen(tempPath) * sizeof(char));
+            arrayCleaner(fullPath, sizeof(fullPath) / sizeof(char));
+            strcpy(fullPath, tempPath);
+            free(tempPath);
+        }
+    } else if (strlen(secondInput) != 0) {
+        char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
+        strcpy(tempPath, fullPath);
+        strcat(tempPath, secondInput);
+        strcat(tempPath, slash);
+        if (isDirectoryExists(tempPath) == 0) {
+            printf("%s\n", strerror(errno));
+        } else {
+            arrayCleaner(fullPath, sizeof(fullPath) / sizeof(char));
+            strcpy(fullPath, tempPath);
+            free(tempPath);
+        }
+    } else {
+        arrayCleaner(fullPath, sizeof(fullPath) / sizeof(char));
+        strcpy(fullPath, h);
+        strcat(fullPath, slash);
+    }
+}
+
+/**
+ * https://stackoverflow.com/questions/845556/how-to-ignore-hidden-files-with-opendir-and-readdir-in-c-library
+ * Searches the directory for all files except for ones that start with . or .. (hidden files)
+ */
+void lsCommand(char* fullPath, char* secondInput){
+    DIR *pd = opendir(fullPath);
+    struct dirent *cur;
+    while (cur = readdir(pd)) {
+        if (strcmp("-a", secondInput) == 0) {
+            printf("%s\n", cur->d_name);
+        } else {
+            if (cur->d_name[0] != '.') {
+                printf("%s\n", cur->d_name);
+            }
+        }
+    }
+    closedir(pd);
+    free(cur);
+}
+
+/**
+ * makes directory
+ */
+void mkdirCommand(char* fullPath, char* slash, char* secondInput){
+    char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
+    arrayCleaner(tempPath,sizeof(tempPath)/sizeof(char));
+    strcpy(tempPath,fullPath);
+    strcat(tempPath, secondInput);
+    strcat(tempPath, slash);
+    if (isDirectoryExists(tempPath) == 0) {
+        mkdir(tempPath,777);
+        free(tempPath);
+    } else {
+        printf("Directory already exists\n");
+        free(tempPath);
+    }
+}
+
+/**
+ * removes directory
+ */
+void rmdirCommand(char* fullPath, char* slash, char* secondInput){
+    char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
+    arrayCleaner(tempPath, sizeof(tempPath) / sizeof(char));
+    strcpy(tempPath,fullPath);
+    strcat(tempPath, secondInput);
+    strcat(tempPath, slash);
+    if (isDirectoryExists(tempPath) == 0) {
+        free(tempPath);
+        printf("Directory doesn't exist\n");
+    } else {
+        rmdir(tempPath);
+        free(tempPath);
+    }
+}
+
+/**
+ * https://stackoverflow.com/questions/13450809/how-to-search-a-string-in-a-char-array-in-c
+ * use strstr() to search for word in and output if found
+ */
+void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInput){
+    char *tempPath = malloc((strlen(fullPath) + strlen(thirdInput) + strlen(slash)) * sizeof(char));
+    strcpy(tempPath, fullPath);
+    strcat(tempPath, thirdInput);
+    FILE *f = fopen(tempPath, "r");
+    if (f != NULL) {
+        char fileArr[256] = "";
+        arrayCleaner(fileArr, sizeof(fileArr));
+        char *string;
+        while (fgets(fileArr, 256, f) != NULL) {
+            string = strstr(fileArr, secondInput);
+            if (string != NULL) {
+                printf("%s", fileArr);
+            }
+        }
+    } else {
+        printf("No file found\n");
+    }
+    free(tempPath);
+}
+
+
+/**
+ * cat will output the content of a file given that the file exists
+ * max number of characters on a line is set to 256
+ */
+void catCommand(char* fullPath, char* slash, char* secondInput){
+    char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
+    strcpy(tempPath, fullPath);
+    strcat(tempPath, secondInput);
+    FILE *f = fopen(tempPath, "r");
+    if (f != NULL) {
+        char fileArr[256] = "";
+        arrayCleaner(fileArr, sizeof(fileArr));
+        while (fgets(fileArr, 256, f) != NULL) {
+            printf("%s", fileArr);
+        }
+    } else {
+        printf("No file found\n");
+    }
+    free(tempPath);
+}
+
+
+
 
 
 
@@ -135,7 +286,7 @@ int main(int argc, char** argv) {
 
         /**
          * Read input of whole line.
-         * Instead of scanf("%s",input);  https://www.quora.com/How-do-I-read-and-display-a-full-sentence-in-C
+         * Instead of scanf() cause i had problems  https://www.quora.com/How-do-I-read-and-display-a-full-sentence-in-C
          */
         scanf("%[^\n]%*c", input);
 
@@ -159,86 +310,27 @@ int main(int argc, char** argv) {
         fourthInput = inputSplitter(input,4);
         fifthInput = inputSplitter(input,5);
 
-        /**
-         * Compare first input with cd
-         * If cd use function
-         */
+
+
         if (strcmp("cd", firstInput) == 0) {
-            /**
-             * If second input is .. we need to go back 1 directory except if the directory is "/"
-             */
-            if (strcmp("..", secondInput) == 0) {
-                if (strlen(fullPath) == 1) {
-                    printf("Path is at lowest point\n");
-                } else previousCD(fullPath);
-            }
-
-                /**
-                 *  Makes a temporary path and checks if it exists, if yes copy the temp path to fullpath
-                 */
-            else if (secondInput[0] == '/') {
-                char *tempPath = malloc((strlen(secondInput) + strlen(slash)) * sizeof(char));
-                arrayCleaner(tempPath,sizeof(tempPath)/sizeof(char));
-                strcat(tempPath, secondInput);
-                strcat(tempPath, slash);
-                if (isDirectoryExists(tempPath) == 0) {
-                    printf("%s\n", strerror(errno));
-                } else {
-                    free(fullPath);
-                    fullPath = malloc(strlen(tempPath) * sizeof(char));
-                    arrayCleaner(fullPath, sizeof(fullPath)/sizeof(char));
-                    strcpy(fullPath, tempPath);
-                    free(tempPath);
-                }
-            } else if (strlen(secondInput) != 0) {
-                char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
-                strcpy(tempPath, fullPath);
-                strcat(tempPath, secondInput);
-                strcat(tempPath, slash);
-                if (isDirectoryExists(tempPath) == 0) {
-                    printf("%s\n", strerror(errno));
-                } else {
-                    arrayCleaner(fullPath, sizeof(fullPath)/sizeof(char));
-                    strcpy(fullPath, tempPath);
-                    free(tempPath);
-                }
-            } else {
-                arrayCleaner(fullPath, sizeof(fullPath)/sizeof(char));
-                strcpy(fullPath, h);
-                strcat(fullPath, slash);
-            }
+            cdCommand(fullPath, slash, h, secondInput);
         }
 
-            /**
-             * https://stackoverflow.com/questions/845556/how-to-ignore-hidden-files-with-opendir-and-readdir-in-c-library
-             * Searches the directory for all files except for ones that start with . or .. (hidden files)
-             */
         else if (strcmp("ls", firstInput) == 0) {
-            DIR *pd = opendir(fullPath);
-            struct dirent *cur;
-            while (cur = readdir(pd)) {
-                if (strcmp("-a", secondInput) == 0) {
-                    printf("%s\n", cur->d_name);
-                } else {
-                    if (cur->d_name[0] != '.') {
-                        printf("%s\n", cur->d_name);
-                    }
-                }
-            }
-            closedir(pd);
-            free(cur);
+            lsCommand(fullPath, secondInput);
         }
 
-            /**
-             * will clear console but only through command line
-             * https://stackoverflow.com/questions/2347770/how-do-you-clear-the-console-screen-in-c
-             */
+        /**
+         * will clear console but only through command line
+         * https://stackoverflow.com/questions/2347770/how-do-you-clear-the-console-screen-in-c
+         */
         else if (strcmp("clear", firstInput) == 0) {
             system("clear\n");
         }
-            /**
-             * Echoes everything after echo and space
-             */
+
+        /**
+         * Echoes everything after echo and space
+         */
         else if (strcmp("echo", firstInput) == 0) {
             for (int i = 5; i < strlen(input); ++i) {
                 printf("%c", input[i]);
@@ -251,95 +343,23 @@ int main(int argc, char** argv) {
             printf("%s\n",fullPath);
         }
 
-
-        /**
-         * makes directory
-         */
         else if (strcmp("mkdir", firstInput) == 0){
-            char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
-            arrayCleaner(tempPath,sizeof(tempPath)/sizeof(char));
-            strcpy(tempPath,fullPath);
-            strcat(tempPath, secondInput);
-            strcat(tempPath, slash);
-            if (isDirectoryExists(tempPath) == 0) {
-                mkdir(tempPath,777);
-                free(tempPath);
-            } else {
-                printf("Directory already exists\n");
-                free(tempPath);
-            }
+            mkdirCommand(fullPath,slash,secondInput);
         }
 
-
-        /**
-         * removes directory
-         */
         else if (strcmp("rmdir", firstInput) == 0) {
-            char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
-            arrayCleaner(tempPath, sizeof(tempPath) / sizeof(char));
-            strcpy(tempPath,fullPath);
-            strcat(tempPath, secondInput);
-            strcat(tempPath, slash);
-            if (isDirectoryExists(tempPath) == 0) {
-                free(tempPath);
-                printf("Directory doesn't exist\n");
-            } else {
-                rmdir(tempPath);
-                free(tempPath);
-            }
+            rmdirCommand(fullPath,slash,secondInput);
         }
-
-
-
-
-
-        /**
-         * https://stackoverflow.com/questions/13450809/how-to-search-a-string-in-a-char-array-in-c
-         * use strstr() to search for word in and output if found
-         */
 
         else if (strcmp("grep", firstInput) == 0) {
-            char *tempPath = malloc((strlen(fullPath) + strlen(thirdInput) + strlen(slash)) * sizeof(char));
-            strcpy(tempPath, fullPath);
-            strcat(tempPath, thirdInput);
-            FILE *f = fopen(tempPath, "r");
-            if (f != NULL) {
-                char fileArr[256] = "";
-                arrayCleaner(fileArr, sizeof(fileArr));
-                char *string;
-                while (fgets(fileArr, 256, f) != NULL) {
-                    string = strstr(fileArr, secondInput);
-                    if (string != NULL) {
-                        printf("%s", fileArr);
-                    }
-                }
-            } else {
-                printf("No file found\n");
-            }
-            free(tempPath);
+            grepCommand(fullPath,slash,secondInput,thirdInput);
         }
 
-
-            /**
-             * cat will output the content of a file given that the file exists
-             * max number of characters on a line is set to 256
-             */
         else if (strcmp("cat", firstInput) == 0) {
-            char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
-            strcpy(tempPath, fullPath);
-            strcat(tempPath, secondInput);
-            FILE *f = fopen(tempPath, "r");
-            if (f != NULL) {
-                char fileArr[256] = "";
-                arrayCleaner(fileArr, sizeof(fileArr));
-                while (fgets(fileArr, 256, f) != NULL) {
-                    printf("%s", fileArr);
-                }
-            } else {
-                printf("No file found\n");
-            }
-            free(tempPath);
-        } else {
+            catCommand(fullPath,slash,secondInput);
+        }
+
+        else {
             printf("Command not found\n");
         }
 
