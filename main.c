@@ -1,10 +1,11 @@
 #include "main.h"
 
 /**
- * Global variables
+ * Global variables and functions
  */
 int TRUE = 1;
 int isPipe = 0;
+void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInput, int lsEnabled, char* lsName, char* grepName);
 
 /**
  *
@@ -129,20 +130,67 @@ void cdCommand(char* fullPath, char* slash, char* h , char* secondInput) {
  * https://stackoverflow.com/questions/845556/how-to-ignore-hidden-files-with-opendir-and-readdir-in-c-library
  * Searches the directory for all files except for ones that start with . or .. (hidden files)
  */
-void lsCommand(char* fullPath, char* secondInput){
-    DIR *pd = opendir(fullPath);
-    struct dirent *cur;
-    while (cur = readdir(pd)) {
-        if (strcmp("-a", secondInput) == 0) {
-            printf("%s\n", cur->d_name);
-        } else {
-            if (cur->d_name[0] != '.') {
-                printf("%s\n", cur->d_name);
+void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourthInput, char* fifthInput){
+    if (isPipe == 0) {
+        if (strcmp(secondInput, "~") == 0) {
+            char *home = getenv("HOME");
+            DIR *pd = opendir(home);
+            struct dirent *cur;
+            while (cur = readdir(pd)) {
+                if (cur->d_name[0] != '.') {
+                    printf("%s\n", cur->d_name);
+                }
             }
+            closedir(pd);
+            free(cur);
+        } else {
+            DIR *pd = opendir(fullPath);
+            struct dirent *cur;
+            while (cur = readdir(pd)) {
+                if (strcmp("-a", secondInput) == 0) {
+                    printf("%s\n", cur->d_name);
+                } else {
+                    if (cur->d_name[0] != '.') {
+                        printf("%s\n", cur->d_name);
+                    }
+                }
+            }
+            closedir(pd);
+            free(cur);
         }
     }
-    closedir(pd);
-    free(cur);
+    else{
+        if (strcmp(secondInput, "|") == 0){
+            DIR *pd = opendir(fullPath);
+            struct dirent *cur;
+            while (cur = readdir(pd)) {
+                if (strcmp("-a", secondInput) == 0) {
+                    grepCommand(fullPath,fullPath,secondInput,thirdInput,1,cur->d_name,fourthInput);
+                } else {
+                    if (cur->d_name[0] != '.') {
+                        grepCommand(fullPath,fullPath,secondInput,thirdInput,1,cur->d_name,fourthInput);
+                    }
+                }
+            }
+            closedir(pd);
+            free(cur);
+        }
+        else if (strcmp(thirdInput, "|") == 0){
+            DIR *pd = opendir(fullPath);
+            struct dirent *cur;
+            while (cur = readdir(pd)) {
+                if (strcmp("-a", secondInput) == 0) {
+                    grepCommand(fullPath,fullPath,secondInput,thirdInput,1,cur->d_name,fifthInput);
+                } else {
+                    if (cur->d_name[0] != '.') {
+                        grepCommand(fullPath,fullPath,secondInput,thirdInput,1,cur->d_name,fifthInput);
+                    }
+                }
+            }
+            closedir(pd);
+            free(cur);
+        }
+    }
 }
 
 /**
@@ -185,26 +233,38 @@ void rmdirCommand(char* fullPath, char* slash, char* secondInput){
  * https://stackoverflow.com/questions/13450809/how-to-search-a-string-in-a-char-array-in-c
  * use strstr() to search for word in and output if found
  */
-void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInput){
-    char *tempPath = malloc((strlen(fullPath) + strlen(thirdInput) + strlen(slash)) * sizeof(char));
-    strcpy(tempPath, fullPath);
-    strcat(tempPath, thirdInput);
-    FILE *f = fopen(tempPath, "r");
-    if (f != NULL) {
-        char fileArr[256] = "";
-        arrayCleaner(fileArr, sizeof(fileArr));
-        char *string;
-        while (fgets(fileArr, 256, f) != NULL) {
-            string = strstr(fileArr, secondInput);
-            if (string != NULL) {
-                printf("%s", fileArr);
+void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInput, int lsEnabled, char* lsName, char* grepName){
+    if (lsEnabled == 0) {
+        char *tempPath = malloc((strlen(fullPath) + strlen(thirdInput) + strlen(slash)) * sizeof(char));
+        strcpy(tempPath, fullPath);
+        strcat(tempPath, thirdInput);
+        FILE *f = fopen(tempPath, "r");
+        if (f != NULL) {
+            char fileArr[256] = "";
+            arrayCleaner(fileArr, sizeof(fileArr));
+            char *string;
+            while (fgets(fileArr, 256, f) != NULL) {
+                string = strstr(fileArr, secondInput);
+                if (string != NULL) {
+                    printf("%s", fileArr);
+                }
+            }
+        } else {
+            printf("No file found\n");
+        }
+        close(f);
+        free(tempPath);
+    }
+    else{
+        if (lsName != NULL){
+            char* string;
+            string = strstr(lsName,grepName);
+            if (string != NULL){
+                printf("%s\n", lsName);
             }
         }
-    } else {
-        printf("No file found\n");
+        else {}
     }
-    close(f);
-    free(tempPath);
 }
 
 
@@ -233,7 +293,7 @@ void catCommand(char* fullPath, char* slash, char* secondInput, char* fourthInpu
     }
     else {
         if (strcmp("grep", fourthInput) == 0) {
-            grepCommand(fullPath, slash, fifthInput, secondInput);
+            grepCommand(fullPath, slash, fifthInput, secondInput,0,slash,slash);
         }
     }
 }
@@ -321,20 +381,20 @@ int main(int argc, char** argv) {
         }
 
         else if (strcmp("ls", firstInput) == 0) {
-            lsCommand(fullPath, secondInput);
+            lsCommand(fullPath, secondInput,thirdInput,fourthInput,fifthInput);
         }
 
-        /**
-         * will clear console but only through command line
-         * https://stackoverflow.com/questions/2347770/how-do-you-clear-the-console-screen-in-c
-         */
+            /**
+             * will clear console but only through command line
+             * https://stackoverflow.com/questions/2347770/how-do-you-clear-the-console-screen-in-c
+             */
         else if (strcmp("clear", firstInput) == 0) {
             system("clear\n");
         }
 
-        /**
-         * Echoes everything after echo and space
-         */
+            /**
+             * Echoes everything after echo and space
+             */
         else if (strcmp("echo", firstInput) == 0) {
             for (int i = 5; i < strlen(input); ++i) {
                 printf("%c", input[i]);
@@ -356,7 +416,7 @@ int main(int argc, char** argv) {
         }
 
         else if (strcmp("grep", firstInput) == 0) {
-            grepCommand(fullPath,slash,secondInput,thirdInput);
+            grepCommand(fullPath,slash,secondInput,thirdInput,0,slash,slash);
         }
 
         else if (strcmp("cat", firstInput) == 0) {
