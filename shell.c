@@ -147,6 +147,8 @@ void cdCommand(char* fullPath, char* slash, char* h , char* secondInput) {
  * https://stackoverflow.com/questions/845556/how-to-ignore-hidden-files-with-opendir-and-readdir-in-c-library
  * Searches the directory for all files except for ones that start with . or .. (hidden files)
  */
+
+//TODO: make ls -a /directory | grep word
 void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourthInput, char* fifthInput){
     // check if there is pipe
     if (isPipe == 0) {

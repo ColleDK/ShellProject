@@ -4,7 +4,7 @@ Unzip package with shell files --> open terminal and go to .../ShellProject/
 
 # **RUNNING**:
 The command will not take all commands from a linux terminal, but will take:   
-1. ls ( -a ) ( | grep _grepWord_ )  
+1. ls ( -a ) ( /_directory_ ) ( | grep _grepWord_ )  
 2. cd ( .. ) ( /_directoryName_ ) ( ~ ) ( _directoryName_ )
 3. mkdir _dirName_
 4. rmdir _dirName_
