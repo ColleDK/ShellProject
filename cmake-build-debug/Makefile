@@ -143,32 +143,32 @@ shell/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/shell.dir/build.make CMakeFiles/shell.dir/build
 .PHONY : shell/fast
 
-main.o: main.c.o
+shell.o: shell.c.o
 
-.PHONY : main.o
+.PHONY : shell.o
 
 # target to build an object file
-main.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/shell.dir/build.make CMakeFiles/shell.dir/main.c.o
-.PHONY : main.c.o
+shell.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shell.dir/build.make CMakeFiles/shell.dir/shell.c.o
+.PHONY : shell.c.o
 
-main.i: main.c.i
+shell.i: shell.c.i
 
-.PHONY : main.i
+.PHONY : shell.i
 
 # target to preprocess a source file
-main.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/shell.dir/build.make CMakeFiles/shell.dir/main.c.i
-.PHONY : main.c.i
+shell.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shell.dir/build.make CMakeFiles/shell.dir/shell.c.i
+.PHONY : shell.c.i
 
-main.s: main.c.s
+shell.s: shell.c.s
 
-.PHONY : main.s
+.PHONY : shell.s
 
 # target to generate assembly for a file
-main.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/shell.dir/build.make CMakeFiles/shell.dir/main.c.s
-.PHONY : main.c.s
+shell.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shell.dir/build.make CMakeFiles/shell.dir/shell.c.s
+.PHONY : shell.c.s
 
 # Help Target
 help:
@@ -179,9 +179,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... shell"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... shell.o"
+	@echo "... shell.i"
+	@echo "... shell.s"
 .PHONY : help
 
 

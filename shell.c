@@ -162,7 +162,35 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
             }
             closedir(pd);
             free(cur);
-        } else {
+        }
+        else if (secondInput[0] == '/') {
+            DIR *pd = opendir(secondInput);
+            struct dirent *cur;
+            while (cur = readdir(pd)) {
+                if (cur->d_name[0] != '.') {
+                    printf("%s\n", cur->d_name);
+                }
+            }
+            closedir(pd);
+            free(cur);
+        }
+        else if (thirdInput[0] == '/'){
+            DIR *pd = opendir(thirdInput);
+            struct dirent *cur;
+            while (cur = readdir(pd)) {
+                if (strcmp("-a", secondInput) == 0) {
+                    printf("%s\n", cur->d_name);
+                } else {
+                    if (cur->d_name[0] != '.') {
+                        printf("%s\n", cur->d_name);
+                    }
+                }
+            }
+            closedir(pd);
+            free(cur);
+        }
+
+        else {
             // else we list either all files (-a) or visible files
             DIR *pd = opendir(fullPath);
             struct dirent *cur;

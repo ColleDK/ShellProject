@@ -77,27 +77,27 @@ include CMakeFiles/shell.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/shell.dir/flags.make
 
-CMakeFiles/shell.dir/main.c.o: CMakeFiles/shell.dir/flags.make
-CMakeFiles/shell.dir/main.c.o: ../main.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/root/CLionProjects/ShellProject/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/shell.dir/main.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shell.dir/main.c.o   -c /root/CLionProjects/ShellProject/main.c
+CMakeFiles/shell.dir/shell.c.o: CMakeFiles/shell.dir/flags.make
+CMakeFiles/shell.dir/shell.c.o: ../shell.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/root/CLionProjects/ShellProject/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/shell.dir/shell.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shell.dir/shell.c.o   -c /root/CLionProjects/ShellProject/shell.c
 
-CMakeFiles/shell.dir/main.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shell.dir/main.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /root/CLionProjects/ShellProject/main.c > CMakeFiles/shell.dir/main.c.i
+CMakeFiles/shell.dir/shell.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shell.dir/shell.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /root/CLionProjects/ShellProject/shell.c > CMakeFiles/shell.dir/shell.c.i
 
-CMakeFiles/shell.dir/main.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shell.dir/main.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /root/CLionProjects/ShellProject/main.c -o CMakeFiles/shell.dir/main.c.s
+CMakeFiles/shell.dir/shell.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shell.dir/shell.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /root/CLionProjects/ShellProject/shell.c -o CMakeFiles/shell.dir/shell.c.s
 
 # Object files for target shell
 shell_OBJECTS = \
-"CMakeFiles/shell.dir/main.c.o"
+"CMakeFiles/shell.dir/shell.c.o"
 
 # External object files for target shell
 shell_EXTERNAL_OBJECTS =
 
-shell: CMakeFiles/shell.dir/main.c.o
+shell: CMakeFiles/shell.dir/shell.c.o
 shell: CMakeFiles/shell.dir/build.make
 shell: CMakeFiles/shell.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/root/CLionProjects/ShellProject/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable shell"
