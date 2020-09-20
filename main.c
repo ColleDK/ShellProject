@@ -5,16 +5,16 @@
  */
 int TRUE = 1;
 int isPipe = 0;
-void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInput, int lsEnabled, char* lsName, char* grepName);
+void grepCommand(); //i need to declare this because i use it in a function before the real declaration
 
 /**
  *
  * @param fullPath is the char[] which has the path
  */
 void previousCD(char* fullPath){
-    /** This will first clear the "/" in front and then clear until the next "/"
-    *
-    */
+    /**
+     * This will first clear the "/" in front and then clear until the next "/"
+     */
     int place = strlen(fullPath)-2;
     fullPath[place+1] = '\0';
     while(fullPath[place] != '/'){
@@ -23,11 +23,11 @@ void previousCD(char* fullPath){
 }
 
 
-// https://codeforwin.org/2018/03/c-program-check-file-or-directory-exists-not.html
 /**
  * Function to check whether a directory exists or not.
  * It returns 1 if given path is directory exists
  * otherwise returns 0.
+ * https://codeforwin.org/2018/03/c-program-check-file-or-directory-exists-not.html
  */
 int isDirectoryExists(const char *path)
 {
@@ -57,19 +57,25 @@ void arrayCleaner(char* arr, int length){
 
 char* inputSplitter(char* arr, int inputNumber){
     int spaceCounter=0, placeCounter=0, startpoint=0, endpoint=0;
+    // i need a i-th number input therefore i move i-1 number of spaces up the array
     while (inputNumber-1 != spaceCounter){
         while (arr[placeCounter] != ' ' && arr[placeCounter] != '\0' && arr[placeCounter] != '\n'){
             placeCounter++;
         }
-        placeCounter++;
         spaceCounter++;
+        // if multiple spaces in a row -> skip it
+        while (arr[++placeCounter] == ' '){
+        }
     }
+
+    // this is input we want
     startpoint = placeCounter;
     while (arr[placeCounter] != ' ' && arr[placeCounter] != '\0' && arr[placeCounter] != '\n'){
         placeCounter++;
     }
     endpoint = placeCounter;
 
+    // make space on heap for the input and return the pointer
     char *array = malloc((endpoint-startpoint) * sizeof(char));
     arrayCleaner(array, sizeof(array)/sizeof(char));
     int loopCounter=0;
@@ -79,20 +85,29 @@ char* inputSplitter(char* arr, int inputNumber){
     return array;
 }
 
-
+/**
+ * Change directory
+ */
 void cdCommand(char* fullPath, char* slash, char* h , char* secondInput) {
-    /**
-    * If second input is .. we need to go back 1 directory except if the directory is "/"
-    */
+    // If second input is .. we need to go back 1 directory except if the directory is "/"
     if (strcmp("..", secondInput) == 0) {
         if (strlen(fullPath) == 1) {
             printf("Path is at lowest point\n");
-        } else previousCD(fullPath);
+        }
+        else previousCD(fullPath);
     }
 
-        /**
-         *  Makes a temporary path and checks if it exists, if yes copy the temp path to fullpath
-         */
+    // if second input is ~ go to home directory
+    else if (strcmp("~", secondInput) == 0){
+        char* home = getenv("HOME");
+        free(fullPath);
+        fullPath = malloc(strlen(home) * sizeof(char));
+        arrayCleaner(fullPath, sizeof(fullPath) / sizeof(char));
+        strcpy(fullPath, home);
+        free(home);
+    }
+
+    // Makes a temporary path and checks if it exists, if yes copy the temp path to fullpath
     else if (secondInput[0] == '/') {
         char *tempPath = malloc((strlen(secondInput) + strlen(slash)) * sizeof(char));
         arrayCleaner(tempPath, sizeof(tempPath) / sizeof(char));
@@ -107,6 +122,8 @@ void cdCommand(char* fullPath, char* slash, char* h , char* secondInput) {
             strcpy(fullPath, tempPath);
             free(tempPath);
         }
+
+        // same as previous
     } else if (strlen(secondInput) != 0) {
         char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
         strcpy(tempPath, fullPath);
@@ -131,7 +148,9 @@ void cdCommand(char* fullPath, char* slash, char* h , char* secondInput) {
  * Searches the directory for all files except for ones that start with . or .. (hidden files)
  */
 void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourthInput, char* fifthInput){
+    // check if there is pipe
     if (isPipe == 0) {
+        // if second input is ~ then list home directory
         if (strcmp(secondInput, "~") == 0) {
             char *home = getenv("HOME");
             DIR *pd = opendir(home);
@@ -144,6 +163,7 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
             closedir(pd);
             free(cur);
         } else {
+            // else we list either all files (-a) or visible files
             DIR *pd = opendir(fullPath);
             struct dirent *cur;
             while (cur = readdir(pd)) {
@@ -160,6 +180,7 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
         }
     }
     else{
+        // if pipe is enabled (only grep is allowed in program) then get name and send to grepcommand
         if (strcmp(secondInput, "|") == 0){
             DIR *pd = opendir(fullPath);
             struct dirent *cur;
@@ -197,11 +218,13 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
  * makes directory
  */
 void mkdirCommand(char* fullPath, char* slash, char* secondInput){
+    // make temporary path and check if exist
     char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
     arrayCleaner(tempPath,sizeof(tempPath)/sizeof(char));
     strcpy(tempPath,fullPath);
     strcat(tempPath, secondInput);
     strcat(tempPath, slash);
+    //if it doesnt exist make directory
     if (isDirectoryExists(tempPath) == 0) {
         mkdir(tempPath,777);
         free(tempPath);
@@ -215,11 +238,13 @@ void mkdirCommand(char* fullPath, char* slash, char* secondInput){
  * removes directory
  */
 void rmdirCommand(char* fullPath, char* slash, char* secondInput){
+    // make temporary path and check if exist
     char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
     arrayCleaner(tempPath, sizeof(tempPath) / sizeof(char));
     strcpy(tempPath,fullPath);
     strcat(tempPath, secondInput);
     strcat(tempPath, slash);
+    //if it doesnt exist dont delete directory
     if (isDirectoryExists(tempPath) == 0) {
         free(tempPath);
         printf("Directory doesn't exist\n");
@@ -234,17 +259,24 @@ void rmdirCommand(char* fullPath, char* slash, char* secondInput){
  * use strstr() to search for word in and output if found
  */
 void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInput, int lsEnabled, char* lsName, char* grepName){
+    //check if it came from lscommand
     if (lsEnabled == 0) {
+        // make temporary path to the file
         char *tempPath = malloc((strlen(fullPath) + strlen(thirdInput) + strlen(slash)) * sizeof(char));
         strcpy(tempPath, fullPath);
         strcat(tempPath, thirdInput);
+        // give pointer read permissions
         FILE *f = fopen(tempPath, "r");
+        // check if file exists
         if (f != NULL) {
             char fileArr[256] = "";
             arrayCleaner(fileArr, sizeof(fileArr));
             char *string;
+            // get 1 line at a time
             while (fgets(fileArr, 256, f) != NULL) {
+                // built in function to check if letter or word is in another char[]
                 string = strstr(fileArr, secondInput);
+                // if grepped word is found in line then print out line
                 if (string != NULL) {
                     printf("%s", fileArr);
                 }
@@ -256,8 +288,10 @@ void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInpu
         free(tempPath);
     }
     else{
+        // maybe pointless but check if pointer is non empty
         if (lsName != NULL){
             char* string;
+            // check if grep word is in name of ls file/directory
             string = strstr(lsName,grepName);
             if (string != NULL){
                 printf("%s\n", lsName);
@@ -275,14 +309,18 @@ void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInpu
  */
 void catCommand(char* fullPath, char* slash, char* secondInput, char* fourthInput, char* fifthInput){
     if (isPipe == 0) {
+        // make temporary path to file
         char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
         strcpy(tempPath, fullPath);
         strcat(tempPath, secondInput);
+        // give pointer read permissions
         FILE *f = fopen(tempPath, "r");
+        // check if file exists
         if (f != NULL) {
             char fileArr[256] = "";
             arrayCleaner(fileArr, sizeof(fileArr));
             while (fgets(fileArr, 256, f) != NULL) {
+                // print out content of file 1 line at a time
                 printf("%s", fileArr);
             }
         } else {
@@ -292,6 +330,7 @@ void catCommand(char* fullPath, char* slash, char* secondInput, char* fourthInpu
         close(f);
     }
     else {
+        // if grep is in cat then send to grep command (since this is not from ls last 3 parameters doesnt matter)
         if (strcmp("grep", fourthInput) == 0) {
             grepCommand(fullPath, slash, fifthInput, secondInput,0,slash,slash);
         }
@@ -303,7 +342,7 @@ void catCommand(char* fullPath, char* slash, char* secondInput, char* fourthInpu
 
 
 
-int main(int argc, char** argv) {
+int main() {
     /**
      * Declare some array pointers to use later with malloc, and a max sized input array
      */
@@ -328,15 +367,6 @@ int main(int argc, char** argv) {
     strcpy(fullPath, h);
     strcat(fullPath, slash);
 
-
-
-    /**
-     * Check if there is input before starting program and do them
-     */
-    if (argc != 0) {
-        // DO THE REQUEST
-
-    }
 
 
     while (TRUE) {
