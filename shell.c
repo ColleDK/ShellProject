@@ -148,8 +148,6 @@ void cdCommand(char* fullPath, char* h , char* secondInput) {
  * https://stackoverflow.com/questions/845556/how-to-ignore-hidden-files-with-opendir-and-readdir-in-c-library
  * Searches the directory for all files except for ones that start with . or .. (hidden files)
  */
-
-//TODO: make ls -a /directory | grep word
 void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourthInput, char* fifthInput, char* sixthInput){
     // check if there is pipe
     if (isPipe == 0) {
@@ -163,8 +161,6 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
                     printf("%s\n", cur->d_name);
                 }
             }
-            closedir(pd);
-            free(cur);
         }
         else if (secondInput[0] == '/') {
             DIR *pd = opendir(secondInput);
@@ -174,8 +170,6 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
                     printf("%s\n", cur->d_name);
                 }
             }
-            closedir(pd);
-            free(cur);
         }
         else if (thirdInput[0] == '/'){
             DIR *pd = opendir(thirdInput);
@@ -189,8 +183,6 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
                     }
                 }
             }
-            closedir(pd);
-            free(cur);
         }
 
         else {
@@ -206,8 +198,6 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
                     }
                 }
             }
-            closedir(pd);
-            free(cur);
         }
     }
     else{
@@ -224,8 +214,6 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
                     }
                 }
             }
-            closedir(pd);
-            free(cur);
         }
         else if (strcmp(thirdInput, "|") == 0){
             DIR *pd = opendir(fullPath);
@@ -239,8 +227,6 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
                     }
                 }
             }
-            closedir(pd);
-            free(cur);
 
 
             // check for ls -a dirName | grep grepWord
@@ -253,8 +239,6 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
                     while (cur = readdir(pd)) {
                         grepCommand(fullPath, fullPath, secondInput, thirdInput, 1, cur->d_name, sixthInput);
                     }
-                    free(cur);
-                    closedir(pd);
                 }
 
                 // typed own directory path
@@ -264,8 +248,6 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
                     while (cur = readdir(pd)) {
                         grepCommand(fullPath, fullPath, secondInput, thirdInput, 1, cur->d_name, sixthInput);
                     }
-                    free(cur);
-                    closedir(pd);
                 }
 
                 //directory in this directory
@@ -280,8 +262,6 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
                         while (cur = readdir(pd)) {
                             grepCommand(fullPath, fullPath, secondInput, thirdInput, 1, cur->d_name, sixthInput);
                         }
-                        free(cur);
-                        closedir(pd);
                     } else printf("Directory not found\n");
                 }
             }
@@ -373,7 +353,6 @@ void grepCommand(char* fullPath, char* secondInput, char* thirdInput, int lsEnab
                 printf("%s\n", lsName);
             }
         }
-        else {}
     }
 }
 
