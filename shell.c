@@ -5,6 +5,7 @@
  */
 int TRUE = 1;
 int isPipe = 0;
+char* slash;
 void grepCommand(); //i need to declare this because i use it in a function before the real declaration
 
 /**
@@ -88,7 +89,7 @@ char* inputSplitter(char* arr, int inputNumber){
 /**
  * Change directory
  */
-void cdCommand(char* fullPath, char* slash, char* h , char* secondInput) {
+void cdCommand(char* fullPath, char* h , char* secondInput) {
     // If second input is .. we need to go back 1 directory except if the directory is "/"
     if (strcmp("..", secondInput) == 0) {
         if (strlen(fullPath) == 1) {
@@ -149,7 +150,7 @@ void cdCommand(char* fullPath, char* slash, char* h , char* secondInput) {
  */
 
 //TODO: make ls -a /directory | grep word
-void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourthInput, char* fifthInput){
+void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourthInput, char* fifthInput, char* sixthInput){
     // check if there is pipe
     if (isPipe == 0) {
         // if second input is ~ then list home directory
@@ -240,6 +241,50 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
             }
             closedir(pd);
             free(cur);
+
+
+            // check for ls -a dirName | grep grepWord
+        } else if (strcmp(fourthInput, "|") == 0){
+            if (strcmp("-a", secondInput) == 0 && strcmp(fifthInput,"grep") == 0) {
+                if (strcmp(thirdInput, "~") == 0) {
+                    char *home = getenv("HOME");
+                    DIR *pd = opendir(home);
+                    struct dirent *cur;
+                    while (cur = readdir(pd)) {
+                        grepCommand(fullPath, fullPath, secondInput, thirdInput, 1, cur->d_name, sixthInput);
+                    }
+                    free(cur);
+                    closedir(pd);
+                }
+
+                // typed own directory path
+                else if (thirdInput[0] == '/') {
+                    DIR *pd = opendir(thirdInput);
+                    struct dirent *cur;
+                    while (cur = readdir(pd)) {
+                        grepCommand(fullPath, fullPath, secondInput, thirdInput, 1, cur->d_name, sixthInput);
+                    }
+                    free(cur);
+                    closedir(pd);
+                }
+
+                //directory in this directory
+                else {
+                    char *tempPath = malloc((strlen(fullPath) + strlen(slash) + strlen(thirdInput)) * sizeof(char));
+                    strcpy(tempPath, fullPath);
+                    strcat(tempPath, slash);
+                    strcat(tempPath, thirdInput);
+                    if (isDirectoryExists(tempPath) == 1) {
+                        DIR *pd = opendir(tempPath);
+                        struct dirent *cur;
+                        while (cur = readdir(pd)) {
+                            grepCommand(fullPath, fullPath, secondInput, thirdInput, 1, cur->d_name, sixthInput);
+                        }
+                        free(cur);
+                        closedir(pd);
+                    } else printf("Directory not found\n");
+                }
+            }
         }
     }
 }
@@ -247,7 +292,7 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
 /**
  * makes directory
  */
-void mkdirCommand(char* fullPath, char* slash, char* secondInput){
+void mkdirCommand(char* fullPath, char* secondInput){
     // make temporary path and check if exist
     char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
     arrayCleaner(tempPath,sizeof(tempPath)/sizeof(char));
@@ -267,7 +312,7 @@ void mkdirCommand(char* fullPath, char* slash, char* secondInput){
 /**
  * removes directory
  */
-void rmdirCommand(char* fullPath, char* slash, char* secondInput){
+void rmdirCommand(char* fullPath, char* secondInput){
     // make temporary path and check if exist
     char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
     arrayCleaner(tempPath, sizeof(tempPath) / sizeof(char));
@@ -288,7 +333,7 @@ void rmdirCommand(char* fullPath, char* slash, char* secondInput){
  * https://stackoverflow.com/questions/13450809/how-to-search-a-string-in-a-char-array-in-c
  * use strstr() to search for word in and output if found
  */
-void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInput, int lsEnabled, char* lsName, char* grepName){
+void grepCommand(char* fullPath, char* secondInput, char* thirdInput, int lsEnabled, char* lsName, char* grepName){
     //check if it came from lscommand
     if (lsEnabled == 0) {
         // make temporary path to the file
@@ -337,7 +382,7 @@ void grepCommand(char* fullPath, char* slash, char* secondInput, char* thirdInpu
  * max number of characters on a line is set to 256
  * Pipeline is placed here also for grepping word in cat
  */
-void catCommand(char* fullPath, char* slash, char* secondInput, char* fourthInput, char* fifthInput){
+void catCommand(char* fullPath, char* secondInput, char* fourthInput, char* fifthInput){
     if (isPipe == 0) {
         // make temporary path to file
         char *tempPath = malloc((strlen(fullPath) + strlen(secondInput) + strlen(slash)) * sizeof(char));
@@ -362,7 +407,7 @@ void catCommand(char* fullPath, char* slash, char* secondInput, char* fourthInpu
     else {
         // if grep is in cat then send to grep command (since this is not from ls last 3 parameters doesnt matter)
         if (strcmp("grep", fourthInput) == 0) {
-            grepCommand(fullPath, slash, fifthInput, secondInput,0,slash,slash);
+            grepCommand(fullPath, fifthInput, secondInput,0,slash,slash);
         }
     }
 }
@@ -381,6 +426,7 @@ int main() {
     char *thirdInput = "";
     char *fourthInput = "";
     char *fifthInput = "";
+    char *sixthInput = "";
     char input[256] = "";
     /**
      * Gets name of home path (maybe i should do current directory instead?) https://www.tutorialspoint.com/c_standard_library/c_function_getenv.htm
@@ -389,7 +435,7 @@ int main() {
     /**
      * This is used for changing directory later on
      */
-    char slash[] = "/";
+    slash = "/";
     /**
      * Allocate memory on heap for the path that is HOME+/
      */
@@ -433,15 +479,16 @@ int main() {
         thirdInput = inputSplitter(input, 3);
         fourthInput = inputSplitter(input,4);
         fifthInput = inputSplitter(input,5);
+        sixthInput = inputSplitter(input,6);
 
 
 
         if (strcmp("cd", firstInput) == 0) {
-            cdCommand(fullPath, slash, h, secondInput);
+            cdCommand(fullPath, h, secondInput);
         }
 
         else if (strcmp("ls", firstInput) == 0) {
-            lsCommand(fullPath, secondInput,thirdInput,fourthInput,fifthInput);
+            lsCommand(fullPath, secondInput,thirdInput,fourthInput,fifthInput,sixthInput);
         }
 
             /**
@@ -468,19 +515,19 @@ int main() {
         }
 
         else if (strcmp("mkdir", firstInput) == 0){
-            mkdirCommand(fullPath,slash,secondInput);
+            mkdirCommand(fullPath,secondInput);
         }
 
         else if (strcmp("rmdir", firstInput) == 0) {
-            rmdirCommand(fullPath,slash,secondInput);
+            rmdirCommand(fullPath,secondInput);
         }
 
         else if (strcmp("grep", firstInput) == 0) {
-            grepCommand(fullPath,slash,secondInput,thirdInput,0,slash,slash);
+            grepCommand(fullPath,secondInput,thirdInput,0,slash,slash);
         }
 
         else if (strcmp("cat", firstInput) == 0) {
-            catCommand(fullPath,slash,secondInput,fourthInput,fifthInput);
+            catCommand(fullPath,secondInput,fourthInput,fifthInput);
         }
 
         else {
@@ -497,6 +544,7 @@ int main() {
         free(thirdInput);
         free(fourthInput);
         free(fifthInput);
+        free(sixthInput);
         fflush(stdin);
     }
     return 0;
