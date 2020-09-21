@@ -289,6 +289,7 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
     }
 }
 
+
 /**
  * makes directory
  */
