@@ -5,7 +5,7 @@
  */
 int TRUE = 1;
 int isPipe = 0;
-char* slash;
+char slash[1];
 void grepCommand(); //i need to declare this because i use it in a function before the real declaration
 
 /**
@@ -105,7 +105,6 @@ void cdCommand(char* fullPath, char* h , char* secondInput) {
         fullPath = malloc(strlen(home) * sizeof(char));
         arrayCleaner(fullPath, sizeof(fullPath) / sizeof(char));
         strcpy(fullPath, home);
-        free(home);
     }
 
     // Makes a temporary path and checks if it exists, if yes copy the temp path to fullpath
@@ -115,6 +114,7 @@ void cdCommand(char* fullPath, char* h , char* secondInput) {
         strcat(tempPath, secondInput);
         strcat(tempPath, slash);
         if (isDirectoryExists(tempPath) == 0) {
+            free(tempPath);
             printf("%s\n", strerror(errno));
         } else {
             free(fullPath);
@@ -131,6 +131,7 @@ void cdCommand(char* fullPath, char* h , char* secondInput) {
         strcat(tempPath, secondInput);
         strcat(tempPath, slash);
         if (isDirectoryExists(tempPath) == 0) {
+            free(tempPath);
             printf("%s\n", strerror(errno));
         } else {
             arrayCleaner(fullPath, sizeof(fullPath) / sizeof(char));
@@ -149,13 +150,14 @@ void cdCommand(char* fullPath, char* h , char* secondInput) {
  * Searches the directory for all files except for ones that start with . or .. (hidden files)
  */
 void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourthInput, char* fifthInput, char* sixthInput){
+    DIR *pd;
+    struct dirent *cur;
     // check if there is pipe
     if (isPipe == 0) {
         // if second input is ~ then list home directory
         if (strcmp(secondInput, "~") == 0) {
             char *home = getenv("HOME");
-            DIR *pd = opendir(home);
-            struct dirent *cur;
+            pd = opendir(home);
             while (cur = readdir(pd)) {
                 if (cur->d_name[0] != '.') {
                     printf("%s\n", cur->d_name);
@@ -163,8 +165,7 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
             }
         }
         else if (secondInput[0] == '/') {
-            DIR *pd = opendir(secondInput);
-            struct dirent *cur;
+            pd = opendir(secondInput);
             while (cur = readdir(pd)) {
                 if (cur->d_name[0] != '.') {
                     printf("%s\n", cur->d_name);
@@ -172,8 +173,7 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
             }
         }
         else if (thirdInput[0] == '/'){
-            DIR *pd = opendir(thirdInput);
-            struct dirent *cur;
+            pd = opendir(thirdInput);
             while (cur = readdir(pd)) {
                 if (strcmp("-a", secondInput) == 0) {
                     printf("%s\n", cur->d_name);
@@ -187,8 +187,7 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
 
         else {
             // else we list either all files (-a) or visible files
-            DIR *pd = opendir(fullPath);
-            struct dirent *cur;
+            pd = opendir(fullPath);
             while (cur = readdir(pd)) {
                 if (strcmp("-a", secondInput) == 0) {
                     printf("%s\n", cur->d_name);
@@ -203,8 +202,7 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
     else{
         // if pipe is enabled (only grep is allowed in program) then get name and send to grepcommand
         if (strcmp(secondInput, "|") == 0){
-            DIR *pd = opendir(fullPath);
-            struct dirent *cur;
+            pd = opendir(fullPath);
             while (cur = readdir(pd)) {
                 if (strcmp("-a", secondInput) == 0) {
                     grepCommand(fullPath,fullPath,secondInput,thirdInput,1,cur->d_name,fourthInput);
@@ -216,8 +214,7 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
             }
         }
         else if (strcmp(thirdInput, "|") == 0){
-            DIR *pd = opendir(fullPath);
-            struct dirent *cur;
+            pd = opendir(fullPath);
             while (cur = readdir(pd)) {
                 if (strcmp("-a", secondInput) == 0) {
                     grepCommand(fullPath,fullPath,secondInput,thirdInput,1,cur->d_name,fifthInput);
@@ -234,8 +231,7 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
             if (strcmp("-a", secondInput) == 0 && strcmp(fifthInput,"grep") == 0) {
                 if (strcmp(thirdInput, "~") == 0) {
                     char *home = getenv("HOME");
-                    DIR *pd = opendir(home);
-                    struct dirent *cur;
+                    pd = opendir(home);
                     while (cur = readdir(pd)) {
                         grepCommand(fullPath, fullPath, secondInput, thirdInput, 1, cur->d_name, sixthInput);
                     }
@@ -243,8 +239,7 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
 
                 // typed own directory path
                 else if (thirdInput[0] == '/') {
-                    DIR *pd = opendir(thirdInput);
-                    struct dirent *cur;
+                    pd = opendir(thirdInput);
                     while (cur = readdir(pd)) {
                         grepCommand(fullPath, fullPath, secondInput, thirdInput, 1, cur->d_name, sixthInput);
                     }
@@ -257,16 +252,18 @@ void lsCommand(char* fullPath, char* secondInput, char* thirdInput, char* fourth
                     strcat(tempPath, slash);
                     strcat(tempPath, thirdInput);
                     if (isDirectoryExists(tempPath) == 1) {
-                        DIR *pd = opendir(tempPath);
-                        struct dirent *cur;
+                        pd = opendir(tempPath);
                         while (cur = readdir(pd)) {
-                            grepCommand(fullPath, fullPath, secondInput, thirdInput, 1, cur->d_name, sixthInput);
+                            grepCommand(fullPath, fullPath, secondInput, thirdInput, 1, cur, sixthInput);
                         }
+                        free(tempPath);
                     } else printf("Directory not found\n");
+                    free(tempPath);
                 }
             }
         }
     }
+    closedir(pd);
 }
 
 
@@ -340,7 +337,7 @@ void grepCommand(char* fullPath, char* secondInput, char* thirdInput, int lsEnab
         } else {
             printf("No file found\n");
         }
-        close(f);
+        fclose(f);
         free(tempPath);
     }
     else{
@@ -382,7 +379,7 @@ void catCommand(char* fullPath, char* secondInput, char* fourthInput, char* fift
             printf("No file found\n");
         }
         free(tempPath);
-        close(f);
+        fclose(f);
     }
     else {
         // if grep is in cat then send to grep command (since this is not from ls last 3 parameters doesnt matter)
@@ -415,14 +412,13 @@ int main() {
     /**
      * This is used for changing directory later on
      */
-    slash = "/";
+    slash[0] = '/';
     /**
      * Allocate memory on heap for the path that is HOME+/
      */
     char *fullPath = malloc((strlen(h) + strlen(slash)) * sizeof(char));
     strcpy(fullPath, h);
     strcat(fullPath, slash);
-
 
 
     while (TRUE) {
