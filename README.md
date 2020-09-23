@@ -11,7 +11,7 @@ The command will not take all commands from a linux terminal, but will take:
 5. grep _grepWord_ _fileName_
 6. cat _fileName_ ( | grep _grepWord_ )    
 
-Everything inside the parenthesis is optional and ls -a | grep _grepWord_ works together.   
+Everything inside the parenthesis is optional and some work together such as ls -a _directoryName_| grep _grepWord_ works together.   
 
 # **BIBLIOGRAPHY**:
 1. https://codeforwin.org/2018/03/c-program-check-file-or-directory-exists-not.html
