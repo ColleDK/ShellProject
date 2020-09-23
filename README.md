@@ -9,7 +9,10 @@ The command will not take all commands from a linux terminal, but will take:
 3. mkdir _dirName_
 4. rmdir _dirName_
 5. grep _grepWord_ _fileName_
-6. cat _fileName_ ( | grep _grepWord_ )    
+6. cat _fileName_ ( | grep _grepWord_ )
+7. clear
+8. pwd
+9. echo _text_    
 
 Everything inside the parenthesis is optional and some work together such as ls -a _directoryName_| grep _grepWord_ works together.   
 
